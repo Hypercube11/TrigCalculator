@@ -1,0 +1,29 @@
+*{
+    font-size: 20px;
+}
+TrigCalculator{
+    background-image: url('./Kub.png');
+    background-repeat: no-repeat;
+    background-position: center;
+}
+QWidget{
+    background-color: #fff;
+    color: #000000;
+}
+QGroupBox{
+    color: #000000;
+}
+
+QPushButton:hover{ 
+    background-color: #ffffff; 
+    color: #000000;
+}
+WidgetSin{
+    color: #717171;
+}
+WidgetCos{
+    color: #717171;
+}
+WidgetTan{
+    color: #717171;
+}
