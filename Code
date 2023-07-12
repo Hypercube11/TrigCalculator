@@ -1,0 +1,107 @@
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+from math import sin, cos, tan, radians
+from PyQt5.QtCore import QFile, QTextStream
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
+
+app = QApplication(sys.argv)
+
+class TrigCalculator(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('Тригонометрический калькулятор')
+        self.setGeometry(100, 100, 500, 200)
+
+        self.angle_label = QLabel('Угол (в градусах):', self)
+        self.angle_input = QLineEdit(self)
+        self.angle_input.textChanged.connect(self.hide_error_message)
+
+        self.sin_label = QLabel('Синус:', self)
+        self.sin_value = WidgetSin('', self)
+        self.cos_label = QLabel('Косинус:', self)
+        self.cos_value = WidgetCos('', self)
+        self.tan_label = QLabel('Тангенс:', self)
+        self.tan_value = WidgetTan('', self)
+
+        self.calculate_button = QPushButton('Рассчитать', self)
+        self.calculate_button.clicked.connect(self.calculate_trig_values)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.angle_label)
+        layout.addWidget(self.angle_input)
+        layout.addWidget(self.calculate_button)
+        layout.addWidget(self.sin_label)
+        layout.addWidget(self.sin_value)
+        layout.addWidget(self.cos_label)
+        layout.addWidget(self.cos_value)
+        layout.addWidget(self.tan_label)
+        layout.addWidget(self.tan_value)
+
+        self.setLayout(layout)
+
+    def calculate_trig_values(self):
+        angle_text = self.angle_input.text()
+        try:
+            angle_degrees = float(angle_text)
+        except ValueError:
+            self.show_error_message("Вам нужно ввести число")
+            return
+
+        angle_radians = radians(angle_degrees)
+
+        # Расчет значений синуса, косинуса и тангенса с точностью до 6 знаков после запятой
+        sin_result = format(sin(angle_radians), '.6f')
+        cos_result = format(cos(angle_radians), '.6f')
+        tan_result = format(tan(angle_radians), '.6f')
+
+        # Обновление меток с результатами
+        self.sin_value.setText(str(sin_result))
+        self.cos_value.setText(str(cos_result))
+        self.tan_value.setText(str(tan_result))
+
+        # Создание графика
+        angles = np.linspace(0, angle_radians, 100)
+        sin_values = np.sin(angles)
+        cos_values = np.cos(angles)
+
+        fig, ax = plt.subplots()
+        ax.plot(sin_values, cos_values)
+        ax.plot([0, sin_result], [0, cos_result], 'ro-')
+        ax.annotate("({}, {})".format(sin_result, cos_result), (sin_result, cos_result), textcoords="offset points", xytext=(10,5), ha='center')
+
+        ax.set(xlabel='Синус', ylabel='Косинус', title='Треугольник')
+        ax.grid()
+
+        plt.show()
+
+    def show_error_message(self, message):
+        error_label = QLabel(message, self)
+        error_label.setStyleSheet("color: red; font-weight: bold;")
+        self.error_label = error_label  # сохраняем ссылку на метку ошибки
+        layout = self.layout()
+        layout.addWidget(error_label)
+
+    def hide_error_message(self):
+        if hasattr(self, 'error_label'):
+            self.error_label.deleteLater()
+            del self.error_label
+
+class WidgetSin(QLabel):
+    pass
+
+class WidgetCos(QLabel):
+    pass
+
+class WidgetTan(QLabel):
+    pass
+
+file = QFile("style.css")                            
+file.open(QFile.ReadOnly | QFile.Text)
+stream = QTextStream(file)
+app.setStyleSheet(stream.readAll())
+
+window = TrigCalculator()
+window.show()
+sys.exit(app.exec_())
